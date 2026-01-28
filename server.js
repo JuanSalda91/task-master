@@ -2,11 +2,13 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const path = require('path');
+const connectDB = require('./config/db.js');
 
 // 2. load environment variables from .env
 dotenv.config();
 
-// 3. create express app
+// 3. create express app --- after creating the confi/db.js, we connect to the db febore starting the server.
+connectDB()
 const app = express();
 
 // 4. global middleware
