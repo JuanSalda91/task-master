@@ -17,7 +17,7 @@ const taskSchema = new Schema (
         },
     },
     {
-        timeStamps: true,
+        timestamps: true,
     }
 );
 

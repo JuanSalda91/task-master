@@ -23,7 +23,7 @@ const projectSchema = new Schema (
         },
     },
     {
-        timeStamps: true, // createdAt / updatedAt
+        timestamps: true, // createdAt / updatedAt
     }
 );
 
