@@ -1,7 +1,8 @@
 // 1. import core tools and User model
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const user = require('../../models/User.js');
+const User = require('../../models/User.js');
+const bcrypt = require('bcrypt');
 
 // 2. create a router instance
 const router = express.Router();
@@ -25,14 +26,18 @@ router.post("/register", async (req, res) => {
             return res
             // 3. if exist, send error 400
             .status(400)
-            .json({ message: "user with this email already exists" });
+            .json({ message: "User with this email already exists" });
         }
+
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         // 4. create new user
         const newUser = new User ({
             username,
             email,
-            password, // plain texy here will be hashed by pre-save hook
+            password: hashedPassword, // plain texy here will be hashed by pre-save hook
         });
 
         // 5. save user to DB (triggers pre-save hook)
@@ -71,7 +76,7 @@ router.post("/login", async (req, res) => {
         }
 
         // 4. compare passwords
-        const isMatch = await user.comparePasswords(password);
+        const isMatch = await user.comparePassword(password);
         if(!isMatch) {
             // 5. If mismatch -> 400 "Invalid credentials" (Bad Rquest)
             return res.status(400).json({ message: "Invalid credentials" });
@@ -86,6 +91,14 @@ router.post("/login", async (req, res) => {
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
             expiresIn: "1h",
         });
+        res.json({
+            token,
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+            }
+        })
     } catch (err) {
         console.error("Error in /login:", err.message);
         res.status(500).json({ message: "Server error during login" });
@@ -94,4 +107,4 @@ router.post("/login", async (req, res) => {
 // - use User model's pre-save hook to hash passwords
 // - use comparePassword method to verify login
 
-module.export = router;
+module.exports = router;
