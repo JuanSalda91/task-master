@@ -15,12 +15,15 @@ const app = express();
 app.use(express.json()); // Parse incoming json bodies
 
 // 5. (placeholder) routes
+const userRoutes = require("./routes/api/userRoutes");
+// mount user routes
+app.use("/api/users", userRoutes);
 
 
 // test route to check server
-app.get('/', (req, res) => {
-    res.json({ message: 'TaskMaster api is running.' });
-});
+// app.get('/', (req, res) => {
+//     res.json({ message: 'TaskMaster api is running.' });
+// });
 
 // 6. port from .env
 const PORT = process.env.PORT || 5000;
