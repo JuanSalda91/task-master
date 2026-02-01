@@ -65,3 +65,35 @@ router.get("/", authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Server error finding projects" });
     }
 });
+
+// ===== GET SINGLE PROJECT =====
+// @route   GET /api/projects/:id
+// @desc    Get a single project by ID (with ownership check)
+// @access  Private (requires token)
+
+router.get("/:id", authenticateToken, async (req, res) => {
+    // 1. Find project by ID
+    // 2. Check if the logged-in user owns it
+    // 3. If not owner -> return 403 "Forbidden"
+    // 4. If owner -> return the project
+
+    const { id } = req.params;
+
+    try {
+        //find project by id
+        const project = await Project.findById(id);
+        //check if proect exists
+        if (!project) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+        // check ownership: cover ID to strings for comparison
+        if(project.user.toString() !== req.user.userId) {
+            return res.status(403).json({ message: "Forbidden: You do not own this project" });
+        }
+        // return the project
+        res.json(project);
+    } catch (err) {
+        console.error("Error in GET /projects/:id:", err.message);
+        res.status(500).json({ message: "Server error fetching project" });
+    }
+});
