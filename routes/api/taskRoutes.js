@@ -98,3 +98,45 @@ router.get("/projects/:projectId/tasks", authenticateToken, async (req,res) => {
         res.status(500).json({ messsage: "Server error fetching tasks" });
     }
 });
+
+// ===== UPDATE TASK =====
+// @route   PUT /api/tasks/:taskId
+// @desc    Update a task (most complex authorization check)
+// @access  Private (requires token + multi-step ownership check)
+
+router.put("/tasks/:taskId", authenticateToken, async (req, res) => {
+    // 1. Find task by ID
+    // 2. Get the parent project
+    // 3. Check if user owns the parent project
+    // 4. Update task fields
+    // 5. Save and return
+    const { taskId } = req.params;
+    const { title, description, status } = req.baody;
+
+    try{
+        //1. find task by ID
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+        //2. get the parent project
+        const project = await Project.findById(task.project);
+        if(!project) {
+            return res.status(404).json({ message: "Project parent not found" });
+        }
+        //3. check if user owns the parent project
+        if(project.user.toString() !== req.user.userId) {
+            return res.status(403).json({ message: "Forbidden: You dont own the project containing this task" });
+        }
+        // 4. update task fields
+        if(title) task.title = title;
+        if(description !== undefined) task.description = description;
+        if(status) task.status = status;
+
+        const updatedTask = await task.save();
+        res.json(updatedTask);
+    } catch (err) {
+        console.error("Error in PUT /tasks/:taskId:", err.message);
+        res.status(500).json({ message: "Server error updating task" });
+    }
+});
