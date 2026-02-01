@@ -62,3 +62,39 @@ router.post("/projects/:projectId/tasks", authenticateToken, async (req, res) =>
         res.status(500).json({ message: "Server error creating task" });
     }
 });
+
+// ===== GET TASKS FOR PROJECT (nested route) =====
+// @route   GET /api/projects/:projectId/tasks
+// @desc    Get all tasks for a specific project
+// @access  Private (requires token + user must own project)
+
+router.get("/projects/:projectId/tasks", authenticateToken, async (req,res) => {
+    // 1. Get projectId from params
+    // 2. Find project by ID
+    // 3. Check ownership
+    // 4. Find all tasks for this project
+    // 5. Return array of tasks
+
+    //1. get project by id
+    const { projectId } = req.params;
+
+    try {
+        //2. find project
+        const project = await Project.findbyId(projectId);
+
+        if (!project) {
+            return res.status(404).json({ message: "Project not ofund" });
+        }
+        //3. check ownership
+        if (project.user.toString() !== req.user.userId) {
+            return res(403).json({ message: "Forbidden: You do not own this project, cannot view task" });
+        }
+        //4. fin all tasks for this project
+        const tasks = await Task.find({ project: projectId });
+        //5. return tasks
+        res.json(tasks);
+    } catch (err) {
+        console.error("Error in GET /projects/:projectId/tasks", err.message);
+        res.status(500).json({ messsage: "Server error fetching tasks" });
+    }
+});
