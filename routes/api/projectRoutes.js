@@ -1,6 +1,6 @@
 // 1. import core tools
 const express = require('express');
-const Project = require('../../models/Project.js');
+const Project = require('../../models/Projects.js');
 const authenticateToken = require('../../utils/auth.js');
 
 // 2. create router
@@ -133,3 +133,39 @@ router.put("/:id", authenticateToken, async (req, res) => {
         res.status(500).json({ Message: "Server error updating project" });
     }
 });
+
+// ===== DELETE PROJECT =====
+// @route   DELETE /api/projects/:id
+// @desc    Delete a project (with ownership check)
+// @access  Private (requires token)
+
+route.delete("/:id", authenticateToken, async (req, res) => {
+    // 1. Find project by ID
+    // 2. Check ownership
+    // 3. Delete from database
+    // 4. Return success message
+
+    const { id } = req.params;
+
+    try {
+        //find project
+        const project = await Project.findById(id);
+        if (!project) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+        // check oenwrship
+        if (project.user.toString() !== req.user.userId) {
+            return res.status(403).json({ message: "Forbidden: You do not own this project" });
+        }
+        //delete the project
+        await Project.findByIdAndDelete(id);
+        //return success
+        res.json({ message: "Project deleted successfully" });
+    } catch (err) {
+        console.error("Error in DELETE /projects/:id");
+        res.status(500).json({ message: "Server error deleting project" });
+    }
+});
+
+// 5. export router
+module.exports = router;
