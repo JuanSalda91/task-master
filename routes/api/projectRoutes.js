@@ -37,11 +37,31 @@ router.post("/", authenticateToken, async (req, res) => {
             user: req.user.userId, //attach to current user
         });
         // save to database
-        const savedProject = await newProject.sace();
+        const savedProject = await newProject.save();
         // return created project
         res.status(201).json(savedProject);
     } catch (err) {
         console.error("Error in POST /projects:", err.message);
         res.status(500).json({ message: "Server error creating project" });
+    }
+});
+
+// ===== GET ALL PROJECTS (for logged-in user) =====
+// @route   GET /api/projects
+// @desc    Get all projects owned by the logged-in user
+// @access  Private (requires token)
+
+router.get("/", authenticateToken, async (req, res) => {
+    // 1. Query projects where user === req.user.userId
+    // 2. Return array of projects
+
+    try {
+        //find all projects owned by this user
+        const projects = await Project.find({ user: req.user.userId });
+        //return the projects
+        res.json(projects);
+    } catch (err) {
+        console.error("Error in GET /projects:", err.message);
+        res.status(500).json({ message: "Server error finding projects" });
     }
 });
