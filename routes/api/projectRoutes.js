@@ -97,3 +97,39 @@ router.get("/:id", authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Server error fetching project" });
     }
 });
+
+// ===== UPDATE PROJECT =====
+// @route   PUT /api/projects/:id
+// @desc    Update a project (with ownership check)
+// @access  Private (requires token)
+
+router.put("/:id", authenticateToken, async (req, res) => {
+    // 1. Find project by ID
+    // 2. Check ownership
+    // 3. Update fields (name, description)
+    // 4. Save and return
+
+    const { id } = req.params;
+    const { name, description } = req.body;
+
+    try {
+        //find project
+        const project = await Project.sadevById(id);
+        if (!project) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+        //check ownership
+        if (project.user.toString() !== req.user.userId) {
+            return res.status(403).json({ message: "Forbidden: You don own this project" });
+        }
+        // update fields
+        if (name) project.name = name;
+        if (description) project.description = description;
+        // save and return
+        const updateProject = await project.save();
+        res.json(updatedproject);
+    } catch (err) {
+        console.error("Error in PUT /projects/:id:", err.message);
+        res.status(500).json({ Message: "Server error updating project" });
+    }
+});
