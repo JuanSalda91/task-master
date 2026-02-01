@@ -140,3 +140,45 @@ router.put("/tasks/:taskId", authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Server error updating task" });
     }
 });
+
+// ===== DELETE TASK =====
+// @route   DELETE /api/tasks/:taskId
+// @desc    Delete a task (same multi-step authorization)
+// @access  Private (requires token + ownership check on parent project)
+
+router.delete("/tasks/:taskId", authenticateToken, async (req, res) => {
+    // 1. Find task by ID
+    // 2. Get parent project
+    // 3. Check ownership of parent project
+    // 4. Delete task from database
+    // 5. Return success message
+
+    const { taskId } = req.params;
+
+    try {
+        //1. find task
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+        //2. get parent project
+        const project = await Project.findById(task.project);
+        if(!project) {
+            return res.status(404).json({ message: "Parent project not found" });
+        }
+        //3. check ownership
+        if (project.user.toString() !== req.user.userId) {
+            return res.status(403).json({ message: "Forbidden: You do not own the project containing this task" });
+        }
+        //4. delete task
+        await Task.findByIdAndDelete(taskId);
+        //5. return success
+        res.json({ message: "Task deleted successfully" });
+    } catch (err) {
+        console.error("Error in DELETE/tasks/:taskId:", err.message);
+        res.status(500).json({ message: "Server error deleting task" });
+    }
+});
+
+//3. export router
+module.exports = router;
