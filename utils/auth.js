@@ -9,8 +9,9 @@ const jwt = require('jsonwebtoken');
 // 2.5 If invalid/expired -> return 401 "Invalid or expired token"
 
 const authenticateToken = (req, res, next) => {
+    console.log("Authorization header:", req.headers["authorization"]);
     // 2.1 check auth
-    const authHeader = req.body["authorization"];
+    const authHeader = req.headers["authorization"];
     // extract token adter "Bearer"
     const token = authHeader && authHeader.split(" ")[1];
 

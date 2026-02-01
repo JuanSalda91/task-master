@@ -16,8 +16,10 @@ app.use(express.json()); // Parse incoming json bodies
 
 // 5. (placeholder) routes
 const userRoutes = require("./routes/api/userRoutes");
+const projectRoutes = require("./routes/api/projectRoutes.js");
 // mount user routes
 app.use("/api/users", userRoutes);
+app.use("/api/projects", projectRoutes);
 
 
 // test route to check server

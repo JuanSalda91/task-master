@@ -139,7 +139,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
 // @desc    Delete a project (with ownership check)
 // @access  Private (requires token)
 
-route.delete("/:id", authenticateToken, async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
     // 1. Find project by ID
     // 2. Check ownership
     // 3. Delete from database
