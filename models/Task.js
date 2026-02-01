@@ -10,11 +10,21 @@ const taskSchema = new Schema (
             required: true,
             trim: true,
         },
-        status: {
-            type: Schema.Types.ObjectId,
-            ref: 'Project', // model name from Project.js
-            required: true, // every task must belong to a project
+        description: {
+            type: String,
+            default: "",
+            trim: true,
         },
+        status: {
+            type: String,
+            enum: ["To Do", "In Progress", "Done"],
+            default: "To Do",
+        },
+        project: {
+            type: Schema.Types.ObjectId,
+            ref: "Project",
+            required: true,
+        }
     },
     {
         timestamps: true,
